@@ -12,7 +12,7 @@
             padding: 0;
         }
         .container {
-            max-width: 700px;
+            max-width: 1600px;
             margin: 40px auto;
             background: #23272e;
             border-radius: 12px;
@@ -64,13 +64,43 @@
             background: #5fd400;
         }
         .results {
-            font-family: 'Fira Mono', 'Consolas', monospace;
+            font-family: 'Segoe UI', Arial, sans-serif;
             background: #111;
             color: #eee;
-            padding: 1.2em 1.5em;
-            border-radius: 8px;
+            padding: 1.2em 1.2em;
+            border-radius: 18px;
             margin-top: 2em;
             font-size: 1.08em;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 2px 12px #0006;
+        }
+        .results-table-wrap {
+            overflow-x: auto;
+            width: 100%;
+        }
+        table {
+            border-radius: 12px;
+            overflow: hidden;
+            background: #181b20;
+        }
+        th, td {
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        th {
+            background: #23272e;
+            color: #b8e994;
+            font-size: 1.08em;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            border-bottom: 2px solid #333;
+        }
+        tr {
+            transition: background 0.15s;
+        }
+        tr:hover:not(.explain-row) {
+            background: #23272e;
         }
         .present {
             color: #7CFC00;
@@ -91,11 +121,57 @@
             font-weight: bold;
             text-align: center;
         }
+        .explain-row {
+            background: #23272e;
+            color: #eee;
+            border-bottom: 1px solid #222;
+            padding: 0;
+        }
+        .explain-content {
+            display: flex;
+            flex-direction: row;
+            gap: 2em;
+            padding: 1.2em 1.5em 1.2em 1.5em;
+            word-break: break-word;
+            background: #23272e;
+            border-radius: 0 0 12px 12px;
+        }
+        .explain-col {
+            min-width: 16em;
+            max-width: 24em;
+        }
+        .explain-col-context {
+            flex: 1;
+            min-width: 18em;
+        }
+        .details-btn {
+            background: #333;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 0.25em 0.9em;
+            cursor: pointer;
+            font-size: 0.97em;
+            margin-top: 0.2em;
+            transition: background 0.2s;
+        }
+        .details-btn:hover {
+            background: #555;
+        }
+        @media (max-width: 1700px) {
+            .container {
+                max-width: 98vw;
+                padding: 1em 0.2em;
+            }
+            .results {
+                max-width: 98vw;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Security Headers Scanner</h1>
+        <h1 style="text-align:center;">Security Headers Scanner</h1>
         <form method="post" action="/scan">
             <label for="url">Website URL:</label>
             <input type="text" id="url" name="url" required value="{{ url or '' }}">
@@ -110,23 +186,63 @@
             {{ error }}
         </div>
         {% endif %}
-        {% if results is not none %}
-        <div class="results">
-            <div><b>--- Security Headers ---</b></div>
-            <br>
-            {% for r in results %}
-                <div class="{{ 'present' if r.present else 'missing' }}">
-                    [{% if r.present %}+{% else %}!{% endif %}] <span class="header-label">{{ r.header }}</span> : {{ r.value }}
-                </div>
-                <br>
-            {% endfor %}
-        </div>
         {% if grade %}
-        <div style="text-align:center; font-size:1.1em; margin-bottom:1em;">
+        <div style="text-align:center; font-size:1.1em; margin:0 0 2em 0;">
             <b>Grade:</b> <span style="font-size:1.1em;">{{ grade }}</span> <span style="font-size:0.9em; color:#aaa;">(Score: {{ score }}/{{ max_score }})</span>
         </div>
         {% endif %}
+        {% if results is not none %}
+        <div class="results">
+            <div style="text-align:center; font-size:1.15em; font-weight:bold; margin-bottom:1em;">--- Security Headers ---</div>
+            <div class="results-table-wrap">
+            <table style="width:100%; border-collapse:separate; border-spacing:0 0.2em; table-layout:fixed;">
+                <thead>
+                    <tr style="border-bottom:1.5px solid #333;">
+                        <th style="text-align:left; padding:0.7em 0.5em; width:4em;">Status</th>
+                        <th style="text-align:left; padding:0.7em 0.5em; width:18em;">Header Name</th>
+                        <th style="text-align:left; padding:0.7em 0.5em; width:28em;">Header Value</th>
+                        <th style="text-align:left; padding:0.7em 0.5em; width:12em;">Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for r in results %}
+                    <tr class="{{ 'present' if r.present else 'missing' }}" style="vertical-align:top;">
+                        <td style="padding:0.7em 0.5em; font-weight:bold; font-size:1.1em;">{% if r.present %}+{% else %}!{% endif %}</td>
+                        <td style="padding:0.7em 0.5em; word-break:break-word;">{{ r.header }}</td>
+                        <td style="padding:0.7em 0.5em; word-break:break-word;">{{ r.value }}</td>
+                        <td style="padding:0.7em 0.5em;">
+                            <button onclick="toggleExplain('explain-{{ loop.index0 }}')" class="details-btn">More details</button>
+                        </td>
+                    </tr>
+                    <tr id="explain-{{ loop.index0 }}" class="explain-row" style="display:none;">
+                        <td colspan="4" style="padding:0; background:#23272e;">
+                            <div style="display:flex; flex-direction:row; gap:2em; background:#2d3138; border-radius: 0 0 12px 12px; padding:1.2em 1.5em;">
+                                <div style="flex:1; min-width:14em; max-width:22em;">
+                                    <div style="margin-bottom:0.7em;"><b>What does this header do?</b><br>{{ r.basic }}</div>
+                                </div>
+                                <div style="flex:2; min-width:18em;">
+                                    <div style="margin-bottom:0.7em;"><b>Why is it important?</b><br><span style="color:#aaa;">{{ r.context }}</span></div>
+                                    <div style="margin-top:1.2em;"><b>Grade Weight:</b> {{ r.weight }}</div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
         {% endif %}
     </div>
+    <script>
+    function toggleExplain(id) {
+        var el = document.getElementById(id);
+        if (el.style.display === 'none') {
+            el.style.display = 'table-row';
+        } else {
+            el.style.display = 'none';
+        }
+    }
+    </script>
 </body>
 </html> 

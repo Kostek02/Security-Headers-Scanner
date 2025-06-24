@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from src.headerscan import scan_headers, SECURITY_HEADERS, normalize_url
+from src.headerscan import scan_headers, SECURITY_HEADERS, normalize_url, HEADER_EXPLANATIONS
 from src.utils.grading import grade_headers
 import requests
 
@@ -23,11 +23,15 @@ def scan():
     for h in SECURITY_HEADERS:
         val = headers.get(h)
         padded = h.ljust(maxlen)
+        explain = HEADER_EXPLANATIONS.get(h, {})
+        basic = explain.get('basic', 'No explanation available.')
+        weight = explain.get('weight', '?')
+        context = explain.get('context', '')
         if val:
             shown = (val[:120] + '...') if val and len(val) > 120 else val
-            results.append({'present': True, 'header': padded, 'value': shown})
+            results.append({'present': True, 'header': padded, 'value': shown, 'basic': basic, 'weight': weight, 'context': context})
         else:
-            results.append({'present': False, 'header': padded, 'value': 'MISSING'})
+            results.append({'present': False, 'header': padded, 'value': 'MISSING', 'basic': basic, 'weight': weight, 'context': context})
     grade, missing, score, max_score = grade_headers(headers)
     return render_template('index.html', results=results, url=url, error=None, grade=grade, score=score, max_score=max_score)
 

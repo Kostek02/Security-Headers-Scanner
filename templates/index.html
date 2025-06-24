@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Security Headers Scanner</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #181818;
+            color: #f3f3f3;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 700px;
+            margin: 40px auto;
+            background: #23272e;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px #000a  ;
+            padding: 2.5em 2em 2em 2em;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.3em;
+            margin-bottom: 1.2em;
+            letter-spacing: 1px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.7em;
+            margin-bottom: 1.5em;
+        }
+        label {
+            font-size: 1.1em;
+        }
+        input[type="text"] {
+            padding: 0.5em 1em;
+            border-radius: 6px;
+            border: none;
+            font-size: 1em;
+            width: 320px;
+            background: #181818;
+            color: #f3f3f3;
+            margin-left: 0.5em;
+        }
+        input[type="checkbox"] {
+            margin-right: 0.5em;
+        }
+        button {
+            background: #7CFC00;
+            color: #181818;
+            border: none;
+            border-radius: 6px;
+            padding: 0.6em 2.2em;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 0.7em;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #5fd400;
+        }
+        .results {
+            font-family: 'Fira Mono', 'Consolas', monospace;
+            background: #111;
+            color: #eee;
+            padding: 1.2em 1.5em;
+            border-radius: 8px;
+            margin-top: 2em;
+            font-size: 1.08em;
+        }
+        .present {
+            color: #7CFC00;
+        }
+        .missing {
+            color: #FF6F6F;
+        }
+        .header-label {
+            min-width: 260px;
+            display: inline-block;
+        }
+        .error-box {
+            color: #fff;
+            background: #c00;
+            padding: 0.7em 1em;
+            border-radius: 6px;
+            margin-top: 1em;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Security Headers Scanner</h1>
+        <form method="post" action="/scan">
+            <label for="url">Website URL:</label>
+            <input type="text" id="url" name="url" required value="{{ url or '' }}">
+            <div style="margin-top: 0.5em;">
+                <input type="checkbox" id="export_csv" name="export_csv" disabled>
+                <label for="export_csv" style="color: #888;">Export results to CSV (coming soon)</label>
+            </div>
+            <button type="submit">Scan</button>
+        </form>
+        {% if error %}
+        <div class="error-box">
+            {{ error }}
+        </div>
+        {% endif %}
+        {% if results is not none %}
+        <div class="results">
+            <div><b>--- Security Headers ---</b></div>
+            <br>
+            {% for r in results %}
+                <div class="{{ 'present' if r.present else 'missing' }}">
+                    [{% if r.present %}+{% else %}!{% endif %}] <span class="header-label">{{ r.header }}</span> : {{ r.value }}
+                </div>
+                <br>
+            {% endfor %}
+        </div>
+        {% if grade %}
+        <div style="text-align:center; font-size:1.1em; margin-bottom:1em;">
+            <b>Grade:</b> <span style="font-size:1.1em;">{{ grade }}</span> <span style="font-size:0.9em; color:#aaa;">(Score: {{ score }}/{{ max_score }})</span>
+        </div>
+        {% endif %}
+        {% endif %}
+    </div>
+</body>
+</html> 

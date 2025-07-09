@@ -194,6 +194,9 @@
         {% if results is not none %}
         <div class="results">
             <div style="text-align:center; font-size:1.15em; font-weight:bold; margin-bottom:1em;">--- Security Headers ---</div>
+            <div style="text-align:center; margin-bottom:1em;">
+                <button id="toggle-all-btn" class="details-btn" onclick="toggleAllDetails()">Open All</button>
+            </div>
             <div class="results-table-wrap">
             <table style="width:100%; border-collapse:separate; border-spacing:0 0.2em; table-layout:fixed;">
                 <thead>
@@ -211,7 +214,7 @@
                         <td style="padding:0.7em 0.5em; word-break:break-word;">{{ r.header }}</td>
                         <td style="padding:0.7em 0.5em; word-break:break-word;">{{ r.value }}</td>
                         <td style="padding:0.7em 0.5em;">
-                            <button onclick="toggleExplain('explain-{{ loop.index0 }}')" class="details-btn">More details</button>
+                            <button onclick="toggleExplain('explain-{{ loop.index0 }}', this)" class="details-btn">More details</button>
                         </td>
                     </tr>
                     <tr id="explain-{{ loop.index0 }}" class="explain-row" style="display:none;">
@@ -235,12 +238,42 @@
         {% endif %}
     </div>
     <script>
-    function toggleExplain(id) {
+    function toggleExplain(id, btn) {
         var el = document.getElementById(id);
         if (el.style.display === 'none') {
             el.style.display = 'table-row';
+            if (btn) btn.textContent = 'Less details';
         } else {
             el.style.display = 'none';
+            if (btn) btn.textContent = 'More details';
+            // Check if all are now closed, update Open All button
+            maybeResetOpenAllBtn();
+        }
+    }
+
+    function toggleAllDetails() {
+        var openAllBtn = document.getElementById('toggle-all-btn');
+        var open = openAllBtn.textContent === 'Open All';
+        var rows = document.querySelectorAll('tr.explain-row');
+        var btns = document.querySelectorAll('button.details-btn');
+        rows.forEach(function(row) {
+            row.style.display = open ? 'table-row' : 'none';
+        });
+        btns.forEach(function(btn) {
+            if (btn !== openAllBtn) btn.textContent = open ? 'Less details' : 'More details';
+        });
+        openAllBtn.textContent = open ? 'Close All' : 'Open All';
+    }
+
+    function maybeResetOpenAllBtn() {
+        var openAllBtn = document.getElementById('toggle-all-btn');
+        var rows = document.querySelectorAll('tr.explain-row');
+        var anyOpen = false;
+        rows.forEach(function(row) {
+            if (row.style.display !== 'none') anyOpen = true;
+        });
+        if (!anyOpen && openAllBtn.textContent === 'Close All') {
+            openAllBtn.textContent = 'Open All';
         }
     }
     </script>

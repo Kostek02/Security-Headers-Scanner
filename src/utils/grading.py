@@ -1,13 +1,9 @@
-HEADER_WEIGHTS = {
-    'Content-Security-Policy': 3,
-    'Strict-Transport-Security': 3,
-    'X-Frame-Options': 2,
-    'X-Content-Type-Options': 2,
-    'Referrer-Policy': 1,
-    'Permissions-Policy': 1,
-    'Cache-Control': 1,
-    'Access-Control-Allow-Origin': 1,
-}
+import json
+
+# Load header weights from scan_rules.json
+with open('src/data/scan_rules.json', 'r') as f:
+    rules = json.load(f)
+HEADER_WEIGHTS = {h['name']: h['weight'] for h in rules['headers']}
 
 GRADE_THRESHOLDS = [
     (9, 'A'),

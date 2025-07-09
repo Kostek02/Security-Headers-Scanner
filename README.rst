@@ -103,7 +103,7 @@ Project Structure
     │   └── utils/
     │       └── grading.py       # Header evaluation and scoring logic
     │   └── data/
-    │       └── best_practices.json  # Header rules and expected values
+    │       └── scan_rules.json      # Header rules and expected values
     ├── reports/
     │   └── (optional output logs)
     ├── README.rst

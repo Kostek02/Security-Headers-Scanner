@@ -70,3 +70,4 @@ ENV/
 
 # Mac
 .DS_Store 
+dev_plan.txt 

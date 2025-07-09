@@ -22,7 +22,7 @@
         h1 {
             text-align: center;
             font-size: 2.3em;
-            margin-bottom: 1.2em;
+            margin-bottom: 0.3em;
             letter-spacing: 1px;
         }
         form {
@@ -172,6 +172,7 @@
 <body>
     <div class="container">
         <h1 style="text-align:center;">Security Headers Scanner</h1>
+        <div style="text-align:center ; color:#a2a2a2; font-size:0.98em; margin-top:-0.1em; margin-bottom:2.2em; letter-spacing:0.03em;">v{{ version }}</div>
         <form method="post" action="/scan">
             <label for="url">Website URL:</label>
             <input type="text" id="url" name="url" required value="{{ url or '' }}">
@@ -193,7 +194,7 @@
         {% endif %}
         {% if results is not none %}
         <div class="results">
-            <div style="text-align:center; font-size:1.15em; font-weight:bold; margin-bottom:1em;">--- Security Headers ---</div>
+            <div style="text-align:center; font-size:1.45em; font-weight:bold; margin-bottom:1em;">Security Headers</div>
             <div style="text-align:center; margin-bottom:1em;">
                 <button id="toggle-all-btn" class="details-btn" onclick="toggleAllDetails()">Open All</button>
             </div>

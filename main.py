@@ -1,6 +1,7 @@
 import argparse
 from src.headerscan import scan_headers, normalize_url, HEADER_EXPLANATIONS, SECURITY_HEADERS
 from src.utils.grading import grade_headers
+from src import VERSION
 
 def scan_url(url):
     url = normalize_url(url)
@@ -41,6 +42,7 @@ def main():
     parser.add_argument('--export-csv', metavar='FILE', help='Export results to CSV file')
     args = parser.parse_args()
 
+    print(f"Security Headers Scanner v{VERSION}\n")
     print(f"Scanning: {args.url}")
     scan = scan_url(args.url)
     if scan['error']:

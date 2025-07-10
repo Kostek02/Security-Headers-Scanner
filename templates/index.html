@@ -4,17 +4,29 @@
     <meta charset="UTF-8">
     <title>Security Headers Scanner</title>
     <style>
+        :root {
+            --accent: #3a8dde; /* modern blue */
+            --accent-dark: #2561a7;
+            --accent-light: #b3d8fd;
+            --present-green: #7CFC00;
+            --error: #c0392b;
+            --error-dark: #8e0e00;
+            --bg: #181818;
+            --panel: #23272e;
+            --text: #f3f3f3;
+            --muted: #b0bfc7;
+        }
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            background: #181818;
-            color: #f3f3f3;
+            background: var(--bg);
+            color: var(--text);
             margin: 0;
             padding: 0;
         }
         .container {
             max-width: 1600px;
             margin: 40px auto;
-            background: #23272e;
+            background: var(--panel);
             border-radius: 12px;
             box-shadow: 0 4px 24px #000a  ;
             padding: 2.5em 2em 2em 2em;
@@ -41,16 +53,16 @@
             border: none;
             font-size: 1em;
             width: 320px;
-            background: #181818;
-            color: #f3f3f3;
+            background: var(--bg);
+            color: var(--text);
             margin-left: 0.5em;
         }
         input[type="checkbox"] {
             margin-right: 0.5em;
         }
         button {
-            background: #7CFC00;
-            color: #181818;
+            background: var(--accent);
+            color: var(--bg);
             border: none;
             border-radius: 6px;
             padding: 0.6em 2.2em;
@@ -61,7 +73,7 @@
             transition: background 0.2s;
         }
         button:hover {
-            background: #5fd400;
+            background: var(--accent-dark);
         }
         .results {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -103,7 +115,7 @@
             background: #23272e;
         }
         .present {
-            color: #7CFC00;
+            color: var(--present-green);
         }
         .missing {
             color: #FF6F6F;
@@ -114,7 +126,7 @@
         }
         .error-box {
             color: #fff;
-            background: #c00;
+            background: var(--error);
             padding: 0.7em 1em;
             border-radius: 6px;
             margin-top: 1em;
@@ -156,7 +168,7 @@
             transition: background 0.2s;
         }
         .details-btn:hover {
-            background: #555;
+            background: var(--accent-dark);
         }
         @media (max-width: 1700px) {
             .container {
@@ -173,18 +185,104 @@
     <div class="container">
         <h1 style="text-align:center;">Security Headers Scanner</h1>
         <div style="text-align:center ; color:#a2a2a2; font-size:0.98em; margin-top:-0.1em; margin-bottom:2.2em; letter-spacing:0.03em;">v{{ version }}</div>
-        <form method="post" action="/scan">
-            <label for="url">Website URL:</label>
+        <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        </style>
+        <div id="loading-overlay" style="
+            display:none;
+            position:fixed;
+            top:0; left:0; width:100vw; height:100vh;
+            background:rgba(24,24,24,0.82);
+            z-index:9999;
+            align-items:center;
+            justify-content:center;
+        ">
+            <div style="display:flex; flex-direction:column; align-items:center;">
+                <div class="spinner" style="
+                    width:64px; height:64px; border:7px solid #333; border-top:7px solid var(--accent);
+                    border-radius:50%; animation:spin 1s linear infinite;
+                "></div>
+                <div style="margin-top:1.2em; color:var(--accent); font-size:1.18em; letter-spacing:0.03em;">Scanning...</div>
+            </div>
+        </div>
+        <form method="post" action="/scan" id="scan-form" autocomplete="off" onsubmit="return validateUrlInputAndShowSpinner();">
+            <label for="url">Website URL to scan:</label>
             <input type="text" id="url" name="url" required value="{{ url or '' }}">
+            <div id="url-error" style="display:none; color:#ffb3b3; background:#2d1818; border-radius:6px; padding:0.5em 1em; margin-bottom:0.7em; font-size:1.04em; text-align:center; font-weight:500;"></div>
             <div style="margin-top: 0.5em;">
                 <input type="checkbox" id="export_csv" name="export_csv" disabled>
-                <label for="export_csv" style="color: #888;">Export results to CSV (coming soon)</label>
+                <label for="export_csv" style="color: #888;">Export results as CSV (coming soon)</label>
             </div>
-            <button type="submit">Scan</button>
+            <button type="submit" id="scan-btn">Start Scan</button>
         </form>
+        <script>
+        function validateUrlInput() {
+            var urlInput = document.getElementById('url');
+            var urlError = document.getElementById('url-error');
+            var url = urlInput.value.trim();
+            var urlPattern = /^(https?:\/\/)?([\w\-]+\.)+[\w\-]{2,}(\/.*)?$/i;
+            if (!url) {
+                urlError.textContent = 'Please enter a website URL.';
+                urlError.style.display = 'block';
+                urlInput.focus();
+                return false;
+            }
+            if (!urlPattern.test(url)) {
+                urlError.textContent = 'Enter a valid website URL (e.g., https://example.com).';
+                urlError.style.display = 'block';
+                urlInput.focus();
+                return false;
+            }
+            urlError.style.display = 'none';
+            return true;
+        }
+        function validateUrlInputAndShowSpinner() {
+            if (!validateUrlInput()) return false;
+            document.getElementById('loading-overlay').style.display = 'flex';
+            document.getElementById('scan-btn').disabled = true;
+            return true;
+        }
+        window.onload = function() {
+            document.getElementById('loading-overlay').style.display = 'none';
+            document.getElementById('scan-btn').disabled = false;
+        };
+        </script>
         {% if error %}
-        <div class="error-box">
-            {{ error }}
+        <div class="error-box" style="
+            background: linear-gradient(90deg, #c0392b 0%, #8e0e00 100%);
+            color: #fff;
+            padding: 1.2em 2em;
+            border-radius: 12px;
+            margin-top: 1.5em;
+            font-weight: 500;
+            text-align: left;
+            box-shadow: 0 2px 16px #0007;
+            display: flex;
+            align-items: flex-start;
+            gap: 1.2em;
+            font-size: 1.13em;
+        ">
+            <span style="font-size:2.1em; line-height:1; margin-right:0.3em;">&#9888;&#65039;</span>
+            <div>
+                <div style="margin-bottom:0.3em; word-break:break-word;">{{ error }}</div>
+                {% if error_type %}
+                <span style="
+                    display: inline-block;
+                    background: #fff2;
+                    color: #ffe0e0;
+                    font-size: 0.98em;
+                    padding: 0.18em 0.8em;
+                    border-radius: 8px;
+                    margin-top: 0.2em;
+                    letter-spacing: 0.03em;
+                ">
+                    Error type: {{ error_type|capitalize }}
+                </span>
+                {% endif %}
+            </div>
         </div>
         {% endif %}
         {% if grade %}
@@ -194,7 +292,7 @@
         {% endif %}
         {% if results is not none %}
         <div class="results">
-            <div style="text-align:center; font-size:1.45em; font-weight:bold; margin-bottom:1em;">Security Headers</div>
+            <div style="text-align:center; font-size:1.45em; font-weight:bold; margin-bottom:1em;">HTTP Security Headers</div>
             <div style="text-align:center; margin-bottom:1em;">
                 <button id="toggle-all-btn" class="details-btn" onclick="toggleAllDetails()">Open All</button>
             </div>
@@ -215,17 +313,17 @@
                         <td style="padding:0.7em 0.5em; word-break:break-word;">{{ r.header }}</td>
                         <td style="padding:0.7em 0.5em; word-break:break-word;">{{ r.value }}</td>
                         <td style="padding:0.7em 0.5em;">
-                            <button onclick="toggleExplain('explain-{{ loop.index0 }}', this)" class="details-btn">More details</button>
+                            <button onclick="toggleExplain('explain-{{ loop.index0 }}', this)" class="details-btn">Details</button>
                         </td>
                     </tr>
                     <tr id="explain-{{ loop.index0 }}" class="explain-row" style="display:none;">
                         <td colspan="4" style="padding:0; background:#23272e;">
                             <div style="display:flex; flex-direction:row; gap:2em; background:#2d3138; border-radius: 0 0 12px 12px; padding:1.2em 1.5em;">
                                 <div style="flex:1; min-width:14em; max-width:22em;">
-                                    <div style="margin-bottom:0.7em;"><b>What does this header do?</b><br>{{ r.basic }}</div>
+                                    <div style="margin-bottom:0.7em;"><b>Header purpose:</b><br>{{ r.basic }}</div>
                                 </div>
                                 <div style="flex:2; min-width:18em;">
-                                    <div style="margin-bottom:0.7em;"><b>Why is it important?</b><br><span style="color:#aaa;">{{ r.context }}</span></div>
+                                    <div style="margin-bottom:0.7em;"><b>Security impact:</b><br><span style="color:#aaa;">{{ r.context }}</span></div>
                                     <div style="margin-top:1.2em;"><b>Grade Weight:</b> {{ r.weight }}</div>
                                 </div>
                             </div>

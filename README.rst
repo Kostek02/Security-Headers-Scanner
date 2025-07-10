@@ -3,6 +3,9 @@ Security Headers Scanner
 
 A lightweight CLI tool to analyze HTTP response headers and evaluate the security posture of web applications.
 
+.. note::
+   **Current Version:** v1.0.1-dev (Patch: Bug Fixes & UX Improvements)
+
 This scanner inspects key HTTP security headers and provides an overall rating with recommendations for hardening based on industry standards (OWASP, Mozilla Observatory).
 
 .. image:: https://img.shields.io/badge/status-in--progress-yellow
@@ -14,6 +17,14 @@ Project Goals
 - Help developers and cybersecurity students assess websites for missing or misconfigured security headers.
 - Reinforce best practices for HTTP security and content protection mechanisms.
 - Serve as a starting point for broader web application hardening tools.
+
+**v1.0.1 Patch Goals (Active):**
+
+- Refactor error messages and handle edge cases (timeouts, bad URLs)
+- Improve GUI responsiveness and validation
+- Clean up help text, typos
+- Add CLI logging options (e.g., --verbose)
+- Polish API route and document usage
 
 Key Features
 ------------
@@ -85,10 +96,10 @@ Quick Example
 Planned Features
 ----------------
 
-- [ ] Output as JSON or Markdown for easy logging/reporting
-- [ ] Add batch scanning mode (multiple URLs from file)
-- [ ] Dockerfile for containerized use
-- [ ] GitLab CI integration for automated scans in CI/CD
+- [ ] Output as JSON or Markdown for easy logging/reporting (planned)
+- [ ] Add batch scanning mode (multiple URLs from file) (planned)
+- [ ] Dockerfile for containerized use (planned)
+- [ ] GitLab CI integration for automated scans in CI/CD (planned)
 
 Project Structure
 -----------------

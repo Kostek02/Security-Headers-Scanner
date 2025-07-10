@@ -17,10 +17,17 @@ init(autoreset=True)
 def scan_headers(url):
     try:
         resp = requests.get(url, timeout=10, verify=False, headers=HEADERS, allow_redirects=True)
+        if resp.status_code >= 400:
+            return {'error': True, 'error_type': 'http', 'error_message': f'HTTP error {resp.status_code} for {url}'}
         return {h: resp.headers.get(h) for h in SECURITY_HEADERS}
+    except requests.exceptions.Timeout:
+        return {'error': True, 'error_type': 'timeout', 'error_message': f'Timeout while connecting to {url}'}
+    except requests.exceptions.SSLError:
+        return {'error': True, 'error_type': 'ssl', 'error_message': f'SSL error while connecting to {url}'}
+    except requests.exceptions.ConnectionError:
+        return {'error': True, 'error_type': 'connection', 'error_message': f'Connection error (DNS, refused, or network) for {url}'}
     except Exception as e:
-        print(f"Error fetching {url}: {e}")
-        return None
+        return {'error': True, 'error_type': 'other', 'error_message': f'Unexpected error: {e}'}
 
 def print_headers_result(headers, truncate=120):
     print("\n--- Security Headers ---\n")
@@ -39,15 +46,24 @@ def normalize_url(url):
     if url.startswith('http://') or url.startswith('https://'):
         return url
     # Try https first, then http
+    errors = []
     for scheme in ['https://', 'http://']:
         test_url = scheme + url
         try:
             resp = requests.get(test_url, timeout=5, verify=False, headers=HEADERS, allow_redirects=True)
             if resp.status_code < 400:
                 return test_url
-        except Exception:
-            continue
-    return None
+            else:
+                errors.append({'scheme': scheme, 'error_type': 'http', 'error_message': f'HTTP error {resp.status_code} for {test_url}'})
+        except requests.exceptions.Timeout:
+            errors.append({'scheme': scheme, 'error_type': 'timeout', 'error_message': f'Timeout while connecting to {test_url}'})
+        except requests.exceptions.SSLError:
+            errors.append({'scheme': scheme, 'error_type': 'ssl', 'error_message': f'SSL error while connecting to {test_url}'})
+        except requests.exceptions.ConnectionError:
+            errors.append({'scheme': scheme, 'error_type': 'connection', 'error_message': f'Connection error (DNS, refused, or network) for {test_url}'})
+        except Exception as e:
+            errors.append({'scheme': scheme, 'error_type': 'other', 'error_message': f'Unexpected error: {e}'})
+    return {'error': True, 'attempts': errors}
 
 if __name__ == '__main__':
     import sys

@@ -4,7 +4,7 @@ Security Headers Scanner
 A lightweight CLI tool to analyze HTTP response headers and evaluate the security posture of web applications.
 
 .. note::
-   **Current Version:** v1.0.1-dev (Patch: Bug Fixes & UX Improvements)
+   **Current Version:** v1.0.2-dev (Patch: CSV Export Support)
 
 This scanner inspects key HTTP security headers and provides an overall rating with recommendations for hardening based on industry standards (OWASP, Mozilla Observatory).
 
@@ -18,13 +18,14 @@ Project Goals
 - Reinforce best practices for HTTP security and content protection mechanisms.
 - Serve as a starting point for broader web application hardening tools.
 
-**v1.0.1 Patch Goals (Active):**
+**v1.0.2 Patch Goals (Active):**
 
-- Refactor error messages and handle edge cases (timeouts, bad URLs)
-- Improve GUI responsiveness and validation
-- Clean up help text, typos
-- Add CLI logging options (e.g., --verbose)
-- Polish API route and document usage
+- Add CSV export option to CLI (command-line)
+- Add CSV export option to GUI (web interface)
+- Refactor export logic into modular export.py
+- Implement --output csv option in CLI
+- Implement "Download CSV" button in GUI
+- Update documentation for CSV export usage
 
 Key Features
 ------------
@@ -91,15 +92,43 @@ Quick Example
     $ python web.py
     # Then open http://127.0.0.1:5000
 
+    # Export results to CSV (CLI):
+    $ python main.py https://github.com --export-csv results.csv
+
     # Note: Some test sites (like badssl.com) may block automated requests. For demos, use github.com or httpbin.org.
+
+CSV Export
+----------
+
+The scanner supports exporting results to CSV format for compliance reporting and record-keeping.
+
+**CLI Export:**
+.. code-block:: bash
+
+    $ python main.py https://example.com --export-csv scan_results.csv
+
+**GUI Export:**
+1. Open the web interface: `python web.py`
+2. Enter a URL and click "Start Scan"
+3. After results appear, click "Download CSV" button
+4. CSV file will be downloaded with filename including the scanned URL
+
+**CSV Format:**
+The exported CSV includes:
+- Summary: Target URL, Security Grade, Score, Missing Headers
+- Detailed results: Status, Header Name, Value, Description, Weight for each security header
 
 Planned Features
 ----------------
 
+- [x] Output as CSV for easy logging/reporting (implemented in v1.0.2)
 - [ ] Output as JSON or Markdown for easy logging/reporting (planned)
 - [ ] Add batch scanning mode (multiple URLs from file) (planned)
 - [ ] Dockerfile for containerized use (planned)
 - [ ] GitLab CI integration for automated scans in CI/CD (planned)
+- [ ] Add API endpoint for programmatic scans (planned)
+- [ ] Add support for custom user-defined headers (planned)
+- [ ] Improve scan_rules.json validation (planned)
 
 Project Structure
 -----------------
@@ -125,7 +154,7 @@ Installation
 
 .. code-block:: bash
 
-    git clone https://github.com/yourusername/security-headers-scanner.git
+    git clone https://github.com/Kostek02/Security-Headers-Scanner.git
     cd security-headers-scanner
     pip install -r requirements.txt
 

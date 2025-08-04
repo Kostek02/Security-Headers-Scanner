@@ -212,10 +212,6 @@
             <label for="url">Website URL to scan:</label>
             <input type="text" id="url" name="url" required value="{{ url or '' }}">
             <div id="url-error" style="display:none; color:#ffb3b3; background:#2d1818; border-radius:6px; padding:0.5em 1em; margin-bottom:0.7em; font-size:1.04em; text-align:center; font-weight:500;"></div>
-            <div style="margin-top: 0.5em;">
-                <input type="checkbox" id="export_csv" name="export_csv" disabled>
-                <label for="export_csv" style="color: #888;">Export results as CSV (coming soon)</label>
-            </div>
             <button type="submit" id="scan-btn">Start Scan</button>
         </form>
         <script>
@@ -295,6 +291,11 @@
             <div style="text-align:center; font-size:1.45em; font-weight:bold; margin-bottom:1em;">HTTP Security Headers</div>
             <div style="text-align:center; margin-bottom:1em;">
                 <button id="toggle-all-btn" class="details-btn" onclick="toggleAllDetails()">Open All</button>
+                <form method="post" action="/scan" style="display:inline; margin-left:1em;">
+                    <input type="hidden" name="url" value="{{ url }}">
+                    <input type="hidden" name="export_csv" value="on">
+                    <button type="submit" class="details-btn" style="background:var(--accent); color:var(--bg);">Download CSV</button>
+                </form>
             </div>
             <div class="results-table-wrap">
             <table style="width:100%; border-collapse:separate; border-spacing:0 0.2em; table-layout:fixed;">

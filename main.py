@@ -3,6 +3,7 @@ from src.headerscan import scan_headers, normalize_url, HEADER_EXPLANATIONS, SEC
 from src.utils.grading import grade_headers
 from src import VERSION
 import logging
+from src.export import export_scan_to_csv
 
 def scan_url(url):
     url_result = normalize_url(url)
@@ -112,7 +113,29 @@ def main():
     if args.grade:
         print("[Grade option enabled]")
     if args.export_csv:
-        print(f"[Exporting results to CSV: {args.export_csv}]")
+        try:
+            # Use scan results directly, not the headers variable
+            results_for_export = []
+            maxlen = max(len(h) for h in SECURITY_HEADERS)
+            for h in SECURITY_HEADERS:
+                val = scan.get(h)
+                padded = h.ljust(maxlen)
+                explain = HEADER_EXPLANATIONS.get(h, {})
+                basic = explain.get('basic', 'No explanation available.')
+                weight = explain.get('weight', '?')
+                context = explain.get('context', '')
+                if val:
+                    shown = (val[:120] + '...') if val and len(val) > 120 else val
+                    results_for_export.append({'present': True, 'header': padded, 'value': shown, 'basic': basic, 'weight': weight, 'context': context})
+                else:
+                    results_for_export.append({'present': False, 'header': padded, 'value': 'MISSING', 'basic': basic, 'weight': weight, 'context': context})
+            
+            export_scan_to_csv(results_for_export, url_result, grade, score, max_score, missing, args.export_csv)
+            print(f"[✓] Results exported to CSV: {args.export_csv}")
+        except Exception as e:
+            print(f"[!] Failed to export CSV: {e}")
+            if args.verbose:
+                logger.error(f"CSV export failed: {e}")
     logger.info("Scan complete.")
 
 if __name__ == '__main__':
